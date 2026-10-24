@@ -355,6 +355,17 @@
             justify-content: center;
             box-sizing: border-box;
         }
+        .save-status {
+            position: absolute;
+            top: 20px;
+            right: 260px;
+            height: 36px;
+            display: none;
+            align-items: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: black;
+        }
         .welcome-message:hover {
             transform: scale(1.05);
             background-color: #f8f8f8;
@@ -723,6 +734,7 @@
             <div class="admin-person-icon" id="adminPersonIcon"></div>
             <div>Welcome, Editor</div>
         </div>
+        <div class="save-status" id="saveStatus">Saved.</div>
         <div class="admin-dropdown-menu" id="adminDropdownMenu">
             <button class="dropdown-item logout-btn" onclick="adminLogout()">Log Out</button>
         </div>
@@ -899,6 +911,7 @@
                 }, 500);
                 document.querySelector('.login-button').style.display = 'none';
                 document.getElementById('adminWelcomeMessage').style.display = 'flex';
+                document.getElementById('saveStatus').style.display = 'flex';
                 document.getElementById('addRowButton').style.display = 'block';
                 document.getElementById('keyboardShortcuts').style.display = 'flex';
                 const rows = document.querySelectorAll('.data-row');
@@ -943,6 +956,7 @@
 
         function adminLogout() {
             document.getElementById('adminWelcomeMessage').style.display = 'none';
+            document.getElementById('saveStatus').style.display = 'none';
             document.querySelector('.login-button').style.display = 'block';
             adminDropdownMenu.classList.remove('show');
             document.getElementById('adminWelcomeMessage').classList.remove('open');
@@ -1027,8 +1041,20 @@
             localStorage.setItem('bulletinData', JSON.stringify(data));
         }
 
+        let saveTimer, savedTimer;
+
         function markAsUnsaved() {
-            saveChanges();
+            const status = document.getElementById('saveStatus');
+            clearTimeout(saveTimer);
+            clearTimeout(savedTimer);
+            status.textContent = 'Saving...';
+            saveTimer = setTimeout(() => {
+                saveChanges();
+                status.textContent = 'Saved!';
+                savedTimer = setTimeout(() => {
+                    status.textContent = 'Saved.';
+                }, 3000);
+            }, 500);
         }
 
         function addChangeListeners(element) {
