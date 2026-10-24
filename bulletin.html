@@ -1047,6 +1047,7 @@
                 rows.forEach(row => {
                     const leftEditable = row.querySelector('.data-row-left');
                     const rightEditable = row.querySelector('.data-row-right');
+                    rightEditable.setAttribute('contenteditable', 'true');
                     addChangeListeners(leftEditable);
                     addChangeListeners(rightEditable);
                 });
@@ -1199,6 +1200,7 @@
 
         function adminLogout() {
             closeCalendar();
+            document.querySelectorAll('.data-row-right').forEach(el => el.setAttribute('contenteditable', 'false'));
             document.getElementById('adminWelcomeMessage').style.display = 'none';
             document.getElementById('saveStatus').style.display = 'none';
             document.querySelector('.login-button').style.display = 'block';
