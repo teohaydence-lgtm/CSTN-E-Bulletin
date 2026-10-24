@@ -563,42 +563,6 @@
         .remove-row-button:hover {
             font-size: 16px;
         }
-        .save-button {
-            position: absolute;
-            top: 20px;
-            right: 260px;
-            padding: 8px 15px;
-            background-color: #003366;
-            color: white;
-            border: 2px solid #003366;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.3s, background-color 0.3s, border-color 0.3s;
-            display: none;
-            width: 190px;
-            justify-content: center;
-            align-items: center;
-            box-sizing: border-box;
-            flex-direction: row;
-            gap: 10px;
-            height: 51px;
-        }
-        .save-button:hover {
-            transform: scale(1.05);
-        }
-        .save-button.saved {
-            background-color: #4da6ff;
-            border-color: #4da6ff;
-        }
-        .save-button:hover {
-            font-size: 16px;
-        }
-        .save-icon {
-            display: inline-block;
-            margin-right: 5px;
-        }
         .data-row {
             width: calc(100% - 20px);
             height: 45px;
@@ -788,10 +752,6 @@
                 <button class="remove-row-button" id="removeRowButton" onclick="removeRow()">- Remove Row</button>
             </div>
         </div>
-        <button class="save-button" id="saveButton" onclick="saveChanges()">
-            <span class="save-icon">↻</span>
-            <span id="saveButtonText">Save</span>
-        </button>
         <div class="keyboard-shortcuts" id="keyboardShortcuts">
             <button class="keyboard-shortcuts-close" onclick="closeKeyboardShortcuts()">×</button>
             <div class="keyboard-shortcuts-heading">Keyboard Shortcuts:</div>
@@ -940,7 +900,6 @@
                 document.querySelector('.login-button').style.display = 'none';
                 document.getElementById('adminWelcomeMessage').style.display = 'flex';
                 document.getElementById('addRowButton').style.display = 'block';
-                document.getElementById('saveButton').style.display = 'flex';
                 document.getElementById('keyboardShortcuts').style.display = 'flex';
                 const rows = document.querySelectorAll('.data-row');
                 if (rows.length > 0) {
@@ -952,9 +911,6 @@
                     addChangeListeners(leftEditable);
                     addChangeListeners(rightEditable);
                 });
-                if (localStorage.getItem('bulletinData')) {
-                    document.getElementById('saveButton').classList.add('saved');
-                }
             } else {
                 errorMessage.style.display = 'flex';
                 passwordInput.value = '';
@@ -995,7 +951,6 @@
             }, 300);
             document.getElementById('addRowButton').style.display = 'none';
             document.getElementById('removeRowButton').style.display = 'none';
-            document.getElementById('saveButton').style.display = 'none';
             document.getElementById('keyboardShortcuts').style.display = 'none';
         }
 
@@ -1070,13 +1025,10 @@
             });
             
             localStorage.setItem('bulletinData', JSON.stringify(data));
-            document.getElementById('saveButtonText').textContent = 'Saved';
-            document.getElementById('saveButton').classList.add('saved');
         }
 
         function markAsUnsaved() {
-            document.getElementById('saveButtonText').textContent = 'Save';
-            document.getElementById('saveButton').classList.remove('saved');
+            saveChanges();
         }
 
         function addChangeListeners(element) {
@@ -1112,8 +1064,7 @@
                 if (!isAdmin) {
                     document.getElementById('addRowButton').style.display = 'none';
                     document.getElementById('removeRowButton').style.display = 'none';
-                    document.getElementById('saveButton').style.display = 'none';
-                    document.getElementById('keyboardShortcuts').style.display = 'none';
+                            document.getElementById('keyboardShortcuts').style.display = 'none';
                 } else {
                     const rows = container.querySelectorAll('.data-row');
                     if (rows.length > 0) {
@@ -1121,20 +1072,16 @@
                     }
                     document.getElementById('keyboardShortcuts').style.display = 'flex';
                 }
-                document.getElementById('saveButtonText').textContent = 'Saved';
-                document.getElementById('saveButton').classList.add('saved');
             } else {
                 document.getElementById('addRowButton').style.display = 'none';
                 document.getElementById('removeRowButton').style.display = 'none';
-                document.getElementById('saveButton').style.display = 'none';
-                document.getElementById('keyboardShortcuts').style.display = 'none';
+                    document.getElementById('keyboardShortcuts').style.display = 'none';
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('addRowButton').style.display = 'none';
             document.getElementById('removeRowButton').style.display = 'none';
-            document.getElementById('saveButton').style.display = 'none';
             document.getElementById('keyboardShortcuts').style.display = 'none';
             loadSavedData();
         });
