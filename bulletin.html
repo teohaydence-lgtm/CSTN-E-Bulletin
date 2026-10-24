@@ -1137,9 +1137,10 @@
         }
 
         function selectDay(d) {
-            selectedDate = new Date(calYear, calMonth, d);
+            const alreadySelected = selectedDate && selectedDate.getFullYear() === calYear && selectedDate.getMonth() === calMonth && selectedDate.getDate() === d;
+            selectedDate = alreadySelected ? null : new Date(calYear, calMonth, d);
             if (activeCell) {
-                activeCell.textContent = formatDate(selectedDate);
+                activeCell.textContent = selectedDate ? formatDate(selectedDate) : '';
                 markAsUnsaved();
             }
             renderCalendar();
