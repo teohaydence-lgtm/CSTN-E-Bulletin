@@ -717,7 +717,115 @@
                 opacity: 1;
             }
         }
-
+        .data-row-left {
+            cursor: pointer;
+            caret-color: transparent;
+            user-select: none;
+        }
+        .calendar-popup {
+            position: absolute;
+            width: 320px;
+            background-color: white;
+            border-radius: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+            box-sizing: border-box;
+            padding: 12px 0 14px 0;
+            color: black;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            user-select: none;
+        }
+        .calendar-popup.show {
+            max-height: 400px;
+            opacity: 1;
+        }
+        .calendar-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: black;
+            text-align: left;
+            padding-left: 20px;
+            padding-bottom: 8px;
+        }
+        .calendar-line {
+            height: 1px;
+            background-color: rgba(0, 0, 0, 0.12);
+        }
+        .calendar-header {
+            display: flex;
+            height: 44px;
+        }
+        .calendar-header-half {
+            width: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+        .calendar-header-half + .calendar-header-half {
+            border-left: 1px solid rgba(0, 0, 0, 0.12);
+        }
+        .calendar-header-text {
+            min-width: 70px;
+            text-align: center;
+        }
+        .calendar-arrow {
+            width: 22px;
+            height: 22px;
+            padding: 0;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 22px;
+            color: black;
+            border-radius: 50%;
+        }
+        .calendar-arrow:hover {
+            background-color: #ececec;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            padding: 6px 8px 0 8px;
+            row-gap: 2px;
+            justify-items: center;
+        }
+        .calendar-weekday {
+            font-size: 12px;
+            font-weight: bold;
+            width: 32px;
+            text-align: center;
+            padding: 4px 0;
+        }
+        .calendar-day {
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            font-size: 14px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .calendar-day:hover {
+            background-color: #e6e6e6;
+        }
+        .calendar-day.selected,
+        .calendar-day.selected:hover {
+            background-color: #0b2a5b;
+            color: white;
+        }
+        .calendar-day.empty {
+            cursor: default;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -769,6 +877,24 @@
             <div class="keyboard-shortcuts-heading">Keyboard Shortcuts:</div>
             <div>To add a row, ctrl + alt + a.</div>
             <div>To remove a row, ctrl + alt + r.</div>
+        </div>
+        <div class="calendar-popup" id="calendarPopup">
+            <div class="calendar-title">Calendar</div>
+            <div class="calendar-line"></div>
+            <div class="calendar-header">
+                <div class="calendar-header-half">
+                    <button class="calendar-arrow" onclick="changeMonth(-1)">&#8249;</button>
+                    <span class="calendar-header-text" id="calendarMonthText"></span>
+                    <button class="calendar-arrow" onclick="changeMonth(1)">&#8250;</button>
+                </div>
+                <div class="calendar-header-half">
+                    <button class="calendar-arrow" onclick="changeYear(-1)">&#8249;</button>
+                    <span class="calendar-header-text" id="calendarYearText"></span>
+                    <button class="calendar-arrow" onclick="changeYear(1)">&#8250;</button>
+                </div>
+            </div>
+            <div class="calendar-line"></div>
+            <div class="calendar-grid" id="calendarGrid"></div>
         </div>
         <div class="content-spacer"></div>
     </div>
@@ -954,7 +1080,124 @@
             }
         }
 
+        const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const calendarPopup = document.getElementById('calendarPopup');
+        const today = new Date();
+        let calYear = today.getFullYear();
+        let calMonth = today.getMonth();
+        let selectedDate = null;
+        let activeCell = null;
+        let calendarHideTimer;
+
+        function ordinal(n) {
+            if (n % 100 >= 11 && n % 100 <= 13) return n + 'th';
+            return n + (['th', 'st', 'nd', 'rd'][n % 10] || 'th');
+        }
+
+        function formatDate(d) {
+            return `${DAY_NAMES[d.getDay()]}, ${ordinal(d.getDate())} ${MONTH_NAMES[d.getMonth()]}, ${d.getFullYear()}`;
+        }
+
+        function parseDate(text) {
+            const m = text.trim().match(/^\w+,\s*(\d+)(?:st|nd|rd|th)\s+(\w+),\s*(\d{4})$/);
+            if (!m) return null;
+            const month = MONTH_NAMES.indexOf(m[2]);
+            return month < 0 ? null : new Date(+m[3], month, +m[1]);
+        }
+
+        function renderCalendar() {
+            document.getElementById('calendarMonthText').textContent = MONTH_NAMES[calMonth];
+            document.getElementById('calendarYearText').textContent = calYear;
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach(d => {
+                const el = document.createElement('div');
+                el.className = 'calendar-weekday';
+                el.textContent = d;
+                grid.appendChild(el);
+            });
+            const offset = (new Date(calYear, calMonth, 1).getDay() + 6) % 7;
+            const days = new Date(calYear, calMonth + 1, 0).getDate();
+            for (let i = 0; i < offset; i++) {
+                const el = document.createElement('div');
+                el.className = 'calendar-day empty';
+                grid.appendChild(el);
+            }
+            for (let d = 1; d <= days; d++) {
+                const el = document.createElement('div');
+                el.className = 'calendar-day';
+                el.textContent = d;
+                if (selectedDate && selectedDate.getFullYear() === calYear && selectedDate.getMonth() === calMonth && selectedDate.getDate() === d) {
+                    el.classList.add('selected');
+                }
+                el.addEventListener('click', () => selectDay(d));
+                grid.appendChild(el);
+            }
+        }
+
+        function selectDay(d) {
+            selectedDate = new Date(calYear, calMonth, d);
+            if (activeCell) {
+                activeCell.textContent = formatDate(selectedDate);
+                markAsUnsaved();
+            }
+            renderCalendar();
+        }
+
+        function changeMonth(delta) {
+            calMonth += delta;
+            if (calMonth < 0) { calMonth = 11; calYear--; }
+            if (calMonth > 11) { calMonth = 0; calYear++; }
+            renderCalendar();
+        }
+
+        function changeYear(delta) {
+            calYear += delta;
+            renderCalendar();
+        }
+
+        function positionCalendar(cell) {
+            const container = document.querySelector('.scroll-container').getBoundingClientRect();
+            const rect = cell.getBoundingClientRect();
+            calendarPopup.style.top = (rect.bottom - container.top + 6) + 'px';
+            calendarPopup.style.left = (rect.left - container.left) + 'px';
+        }
+
+        function openCalendar(cell) {
+            clearTimeout(calendarHideTimer);
+            activeCell = cell;
+            selectedDate = parseDate(cell.textContent);
+            const base = selectedDate || new Date();
+            calYear = base.getFullYear();
+            calMonth = base.getMonth();
+            renderCalendar();
+            positionCalendar(cell);
+            calendarPopup.style.display = 'block';
+            setTimeout(() => calendarPopup.classList.add('show'), 10);
+        }
+
+        function closeCalendar() {
+            activeCell = null;
+            calendarPopup.classList.remove('show');
+            calendarHideTimer = setTimeout(() => {
+                if (!calendarPopup.classList.contains('show')) calendarPopup.style.display = 'none';
+            }, 300);
+        }
+
+        document.addEventListener('click', (e) => {
+            const isAdmin = document.getElementById('adminWelcomeMessage').style.display === 'flex';
+            const cell = e.target.closest('.data-row-left');
+            if (isAdmin && cell) {
+                if (cell === activeCell) closeCalendar();
+                else openCalendar(cell);
+            } else if (!e.composedPath().includes(calendarPopup)) {
+                closeCalendar();
+            }
+        });
+
         function adminLogout() {
+            closeCalendar();
             document.getElementById('adminWelcomeMessage').style.display = 'none';
             document.getElementById('saveStatus').style.display = 'none';
             document.querySelector('.login-button').style.display = 'block';
@@ -995,7 +1238,7 @@
             newRow.className = 'data-row';
             newRow.innerHTML = `
                 <div class="data-row-strike"></div>
-                <div class="data-row-left" contenteditable="true"></div>
+                <div class="data-row-left" contenteditable="false"></div>
                 <div class="data-row-right" contenteditable="true"></div>
             `;
             container.insertBefore(newRow, buttonContainer);
@@ -1074,7 +1317,7 @@
                     newRow.className = 'data-row';
                     newRow.innerHTML = `
                         <div class="data-row-strike"></div>
-                        <div class="data-row-left" contenteditable="${isAdmin}">${item.left}</div>
+                        <div class="data-row-left" contenteditable="false">${item.left}</div>
                         <div class="data-row-right" contenteditable="${isAdmin}">${item.right}</div>
                     `;
                     container.insertBefore(newRow, buttonContainer);
