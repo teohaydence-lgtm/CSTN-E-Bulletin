@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events - Church Of Saint Theresa</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="scroll-container">
+        <div class="top-left-bar">
+        <div class="language-wrap" id="languageWrap">
+        <div class="language-button" id="languageButton" onclick="toggleLanguageDropdown()">
+            <span>&#9881;</span>
+            <span data-i18n="language">English</span>
+        </div>
+        <div class="language-dropdown" id="languageDropdown">
+            <div class="language-rect">
+                <div class="language-option selected" data-lang="en" onclick="chooseLanguage('en')">
+                    <svg class="language-flag" viewBox="0 0 30 20"><rect width="30" height="20" fill="#fff"/><g fill="#B22234"><rect y="0" width="30" height="1.54"/><rect y="3.08" width="30" height="1.54"/><rect y="6.16" width="30" height="1.54"/><rect y="9.24" width="30" height="1.54"/><rect y="12.32" width="30" height="1.54"/><rect y="15.4" width="30" height="1.54"/><rect y="18.46" width="30" height="1.54"/></g><rect width="12" height="10.8" fill="#3C3B6E"/></svg>
+                    <span>English</span>
+                </div>
+                <div class="language-divider"></div>
+                <div class="language-option" data-lang="ms" onclick="chooseLanguage('ms')">
+                    <svg class="language-flag" viewBox="0 0 30 20"><rect width="30" height="20" fill="#fff"/><g fill="#CC0001"><rect y="0" width="30" height="1.43"/><rect y="2.86" width="30" height="1.43"/><rect y="5.72" width="30" height="1.43"/><rect y="8.58" width="30" height="1.43"/><rect y="11.44" width="30" height="1.43"/><rect y="14.3" width="30" height="1.43"/><rect y="17.16" width="30" height="1.43"/></g><rect width="15" height="10" fill="#010066"/><circle cx="6" cy="5" r="3" fill="#FC0"/><circle cx="6.9" cy="5" r="2.4" fill="#010066"/></svg>
+                    <span>Melayu</span>
+                </div>
+                <div class="language-divider"></div>
+                <div class="language-option" data-lang="ta" onclick="chooseLanguage('ta')">
+                    <svg class="language-flag" viewBox="0 0 30 20"><rect width="30" height="6.67" fill="#FF9933"/><rect y="6.67" width="30" height="6.66" fill="#fff"/><rect y="13.33" width="30" height="6.67" fill="#138808"/><circle cx="15" cy="10" r="2.4" fill="none" stroke="#000080" stroke-width="0.6"/></svg>
+                    <span>தமிழ்</span>
+                </div>
+            </div>
+        </div>
+        </div>
+<a class="language-button home-pill" href="index.html"><span>&#8962;</span><span data-i18n="home">Home</span></a>
+        </div>
+        <button class="login-button" onclick="openModal()" data-i18n="login">Login</button>
+        <div class="welcome-message" id="welcomeMessage" onclick="toggleDropdown()">
+            <div class="person-icon">👤</div>
+            <div data-i18n="welcome_user">Welcome, User</div>
+        </div>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <button class="dropdown-item logout-btn" onclick="logout()" data-i18n="logout">Log Out</button>
+        </div>
+        <div class="admin-welcome-message" id="adminWelcomeMessage" onclick="toggleAdminDropdown()">
+            <div class="admin-person-icon" id="adminPersonIcon"></div>
+            <div>Welcome, Editor</div>
+        </div>
+        <div class="save-status" id="saveStatus">Saved.</div>
+        <div class="admin-dropdown-menu" id="adminDropdownMenu">
+            <button class="dropdown-item logout-btn" onclick="adminLogout()">Log Out</button>
+        </div>
+        <div class="page-title" data-i18n="events">Events</div>
+        <div class="heading-rectangle">
+            <div class="strike-line"></div>
+            <div class="date-text" data-i18n="date_of_event">Date Of Event</div>
+            <div class="event-text" data-i18n="event">Event</div>
+        </div>
+        <div id="dataRowsContainer">
+            <div class="button-container">
+                <button class="add-row-button" id="addRowButton" onclick="addRow()">+ Add Row</button>
+                <button class="remove-row-button" id="removeRowButton" onclick="removeRow()">- Remove Row</button>
+            </div>
+        </div>
+        <div class="keyboard-shortcuts" id="keyboardShortcuts">
+            <button class="keyboard-shortcuts-close" onclick="closeKeyboardShortcuts()">×</button>
+            <div class="keyboard-shortcuts-heading">Keyboard Shortcuts:</div>
+            <div>To add a row, ctrl + alt + a.</div>
+            <div>To remove a row, ctrl + alt + r.</div>
+        </div>
+        <div class="calendar-popup" id="calendarPopup">
+            <div class="calendar-title">Calendar</div>
+            <div class="calendar-line"></div>
+            <div class="calendar-header">
+                <div class="calendar-header-half">
+                    <button class="calendar-arrow" onclick="changeMonth(-1)">&#8249;</button>
+                    <span class="calendar-header-text" id="calendarMonthText"></span>
+                    <button class="calendar-arrow" onclick="changeMonth(1)">&#8250;</button>
+                </div>
+                <div class="calendar-header-half">
+                    <button class="calendar-arrow" onclick="changeYear(-1)">&#8249;</button>
+                    <span class="calendar-header-text" id="calendarYearText"></span>
+                    <button class="calendar-arrow" onclick="changeYear(1)">&#8250;</button>
+                </div>
+            </div>
+            <div class="calendar-line"></div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+        <div class="content-spacer"></div>
+    </div>
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-title">Select Access Level</div>
+            <div class="modal-buttons">
+                <button class="modal-button admin" onclick="selectAdmin()">Super Admin</button>
+            </div>
+        </div>
+    </div>
+    <div class="viewer-modal" id="viewerModal">
+        <div class="viewer-modal-content">
+            <div class="viewer-modal-message">If you are viewing, you don't need to login.</div>
+            <button class="continue-button" onclick="closeViewerModal()">Continue</button>
+        </div>
+    </div>
+    <div class="admin-modal" id="adminModal">
+        <div class="admin-modal-content">
+            <button class="close-button" onclick="closeAdminModal(event)">×</button>
+            <div class="admin-modal-title">Enter The Password</div>
+            <input type="password" class="password-input" id="passwordInput" placeholder="Enter password">
+            <button class="submit-button" onclick="checkPassword()">Submit</button>
+            <div class="error-message" id="errorMessage">
+                <div class="error-icon">!</div>
+                <span>That's not the right password. Please try again.</span>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
